@@ -40,7 +40,7 @@ const Type = ({ navigation }) => {
           onValueChange={handleGeneral}
           color={isGeneral ? "orange" : undefined}
         />
-        <Text style={{ fontWeight: "bold" }}>General reference</Text>
+        <Text style={{ fontWeight: "bold" }}>General referral</Text>
       </View>
       <Text style={{ color: "black", paddingStart: 35 }}>
         (I am an individual with occasional referrals)

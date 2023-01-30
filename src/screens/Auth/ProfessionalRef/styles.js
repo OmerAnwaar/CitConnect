@@ -16,6 +16,14 @@ const styles = StyleSheet.create({
   },
   errorText: { color: "#FF4842", paddingVertical: "2%" },
   divider: { paddingVertical: "2%" },
+  pickerStyle: {
+    marginBottom: 15,
+  },
+  pickerItemSeperatorStyle: {
+    height: 1,
+    backgroundColor: "grey",
+    marginVertical: 5,
+  },
 });
 
 export default styles;
