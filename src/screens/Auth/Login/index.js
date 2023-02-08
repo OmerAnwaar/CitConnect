@@ -1,11 +1,13 @@
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Formik } from "formik";
 import React, { useState } from "react";
-import { Alert, Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import { useDispatch } from "react-redux";
 
 import * as yup from "yup";
 
+import { auth } from "../../../../firebaseConfig";
 import CcButton from "../../../components/CcButton";
 import CcTextInput from "../../../components/CcTextInput";
 import icons from "../../../constants";

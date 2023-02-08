@@ -1,6 +1,13 @@
 import { Formik } from "formik";
-import React, { useState } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TextInput } from "react-native-paper";
 
@@ -10,8 +17,9 @@ import { useDispatch } from "react-redux";
 import CcButton from "../../../components/CcButton";
 import CcTextInput from "../../../components/CcTextInput";
 import icons from "../../../constants";
-import { onLogin } from "../../../store/features/authSlice";
+import { createUser, ifUserExists } from "../../../store/features/authSlice";
 import styles from "./styles";
+import { auth } from "../../../../firebaseConfig";
 
 const initialValues = {
   firstname: "",
@@ -24,8 +32,10 @@ const initialValues = {
 
 const Registration = ({ navigation, route }) => {
   const { params } = route;
-  console.log("object", params.isProfessional);
   const [secure, setSecure] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+
   const dispatch = useDispatch();
 
   const validationSchema = yup.object().shape({
@@ -36,18 +46,71 @@ const Registration = ({ navigation, route }) => {
     password: yup.string().required(),
   });
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  console.log(user);
+
+  async function onAuthenticate() {
+    try {
+      await auth.signOut();
+    } catch (err) {
+      Alert.alert(err);
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    // onAuthenticate();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const handleRegistration = async (values) => {
     try {
+      setLoading(true);
+      // const uid = user.uid;
       const payload = {
         firstname: values.firstname,
         lastname: values.lastname,
         phone: values.phone,
         email: values.email,
         password: values.password,
+        // uid,
+        path: params.isProfessional ? "Professional" : "General",
       };
-      dispatch(onLogin("general"));
+      // const result = await ifUserExists(uid);
+      // console.log(result);
+      // if (result === true) {
+      //   Alert.alert("User Already Exist!");
+      //   setLoading(false);
+      //   return;
+      // }
+      const res = await dispatch(createUser(payload));
+      console.log("res", res._tokenResponse.isNewUser);
+      // dispatch(onLogin("general"));
+      setLoading(false);
       console.log(payload);
     } catch (err) {
+      setLoading(false);
       console.log(err);
     }
   };
@@ -193,6 +256,7 @@ const Registration = ({ navigation, route }) => {
           )}
         </Formik>
       </ScrollView>
+      {loading && <ActivityIndicator style={{ flex: 1 }} size={"large"} />}
     </KeyboardAwareScrollView>
   );
 };

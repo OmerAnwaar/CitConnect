@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import React from "react";
 
-import MainNavigator from "./MainNavigator";
 import AuthNavigator from "./AuthNavigator";
+import MainNavigator from "./MainNavigator";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSelector } from "react-redux";
 
 const Routes = () => {
