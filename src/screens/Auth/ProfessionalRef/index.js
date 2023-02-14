@@ -1,35 +1,38 @@
-import Checkbox from "expo-checkbox";
-import { Formik } from "formik";
-import React, { useState } from "react";
-import { Alert, Image, Text, View } from "react-native";
-import DropDownPicker from "react-native-dropdown-picker";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useDispatch } from "react-redux";
-import * as yup from "yup";
+import { useRoute } from '@react-navigation/native';
+import Checkbox from 'expo-checkbox';
+import { Formik } from 'formik';
+import React, { useState } from 'react';
+import { Alert, Image, Text, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useDispatch } from 'react-redux';
+import * as yup from 'yup';
 
-import CcButton from "../../../components/CcButton";
-import CcTextInput from "../../../components/CcTextInput";
-import icons from "../../../constants";
-import { onLogin } from "../../../store/features/authSlice";
-import styles from "./styles";
+import CcButton from '../../../components/CcButton';
+import CcTextInput from '../../../components/CcTextInput';
+import icons from '../../../constants';
+import { createUser } from '../../../store/features/authSlice';
+import styles from './styles';
 
 const initialValues = {
-  bussinessEIN: "",
-  address: "",
-  username: "",
-  globalErr: "",
+  bussinessEIN: '',
+  address: '',
+  username: '',
+  globalErr: '',
 };
 
-const ProfessionalRef = ({ navigation, route }) => {
+const ProfessionalRef = () => {
+  const { params } = useRoute();
   const [isWeekly, setIsWeekly] = useState(false);
   const [isDirect, setIsDirect] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState('');
   const [items, setItems] = useState([
-    { label: "Zelle", value: "zelle" },
-    { label: "Cashapp", value: "cashapp" },
-    { label: "Paypal", value: "paypal" },
-    { label: "Venmo", value: "venmo" },
+    { label: 'Zelle', value: 'zelle' },
+    { label: 'Cashapp', value: 'cashapp' },
+    { label: 'Paypal', value: 'paypal' },
+    { label: 'Venmo', value: 'venmo' },
   ]);
 
   const validationSchema = yup.object().shape({
@@ -42,21 +45,35 @@ const ProfessionalRef = ({ navigation, route }) => {
   const handleSubmit = async (values) => {
     try {
       if (!isWeekly && !isDirect) {
-        Alert.alert("Please select payment method!");
+        Alert.alert('Please select payment method!');
         return;
       }
       if (isDirect && !value) {
-        Alert.alert("Please select an option for Payments!");
+        Alert.alert('Please select an option for Payments!');
         return;
       }
-      const payload = {
-        bussinessEIN: values.bussinessEIN,
-        address: values.address,
-        username: values.username,
-      };
-      dispatch(onLogin("professional"));
+      setLoading(true);
+      let payload;
+      if (isWeekly) {
+        payload = {
+          ...params,
+          businessEIN: values.bussinessEIN,
+          address: values.address,
+        };
+      } else if (isDirect) {
+        payload = {
+          ...params,
+          bushinessEIN: values.bussinessEIN,
+          paymentType: value,
+          paymentUser: values.username,
+        };
+      }
+      console.log(payload);
+      await dispatch(createUser(payload)).unwrap();
+      setLoading(false);
     } catch (err) {
-      console.log(err);
+      console.error(err.message);
+      setLoading(false);
     }
   };
 
@@ -74,7 +91,7 @@ const ProfessionalRef = ({ navigation, route }) => {
       <Image
         style={styles.longLogo}
         source={icons.LOGO}
-        resizeMode={"contain"}
+        resizeMode={'contain'}
       />
       <Formik
         initialValues={initialValues}
@@ -91,13 +108,13 @@ const ProfessionalRef = ({ navigation, route }) => {
         }) => (
           <>
             <CcTextInput
-              label={"Bussiness EIN"}
-              keyboardType="phone-number"
-              onChangeText={handleChange("bussinessEIN")}
-              onBlur={handleBlur("bussinessEIN")}
+              label={'Bussiness EIN'}
+              keyboardType='phone-number'
+              onChangeText={handleChange('bussinessEIN')}
+              onBlur={handleBlur('bussinessEIN')}
               value={values.bussinessEIN}
               outlineColor={
-                touched.bussinessEIN && errors.bussinessEIN ? "red" : "gray"
+                touched.bussinessEIN && errors.bussinessEIN ? 'red' : 'gray'
               }
               right={null}
             />
@@ -106,24 +123,24 @@ const ProfessionalRef = ({ navigation, route }) => {
             ) : (
               <View style={styles.divider} />
             )}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Checkbox
                 style={styles.checkbox}
                 value={isWeekly}
                 onValueChange={handleGeneral}
-                color={isWeekly ? "orange" : undefined}
+                color={isWeekly ? 'orange' : undefined}
               />
               <Text>Mail referral fee to bussiness address (2-3 weeks)</Text>
             </View>
             {isWeekly && (
               <>
                 <CcTextInput
-                  label={"Address"}
-                  onChangeText={handleChange("address")}
-                  onBlur={handleBlur("address")}
+                  label={'Address'}
+                  onChangeText={handleChange('address')}
+                  onBlur={handleBlur('address')}
                   value={values.address}
                   outlineColor={
-                    touched.address && errors.address ? "red" : "gray"
+                    touched.address && errors.address ? 'red' : 'gray'
                   }
                   right={null}
                 />
@@ -136,16 +153,16 @@ const ProfessionalRef = ({ navigation, route }) => {
             )}
             <View
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingBottom: "4%",
+                flexDirection: 'row',
+                alignItems: 'center',
+                paddingBottom: '4%',
               }}
             >
               <Checkbox
                 style={styles.checkbox}
                 value={isDirect}
                 onValueChange={handleProfessional}
-                color={isDirect ? "orange" : undefined}
+                color={isDirect ? 'orange' : undefined}
               />
               <Text>Mobile Payment</Text>
             </View>
@@ -162,15 +179,15 @@ const ProfessionalRef = ({ navigation, route }) => {
                   itemSeparatorStyle={styles.pickerItemSeperatorStyle}
                   style={styles.pickerStyle}
                 />
-                {(value === "cashapp" || value === "venmo") && (
+                {(value === 'cashapp' || value === 'venmo') && (
                   <>
                     <CcTextInput
-                      label={"Username"}
-                      onChangeText={handleChange("username")}
-                      onBlur={handleBlur("username")}
+                      label={'Username'}
+                      onChangeText={handleChange('username')}
+                      onBlur={handleBlur('username')}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? "red" : "gray"
+                        touched.username && errors.username ? 'red' : 'gray'
                       }
                       right={null}
                     />
@@ -181,15 +198,15 @@ const ProfessionalRef = ({ navigation, route }) => {
                     )}
                   </>
                 )}
-                {value === "zelle" && (
+                {value === 'zelle' && (
                   <>
                     <CcTextInput
-                      label={"Phone Number or Email"}
-                      onChangeText={handleChange("username")}
-                      onBlur={handleBlur("username")}
+                      label={'Phone Number or Email'}
+                      onChangeText={handleChange('username')}
+                      onBlur={handleBlur('username')}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? "red" : "gray"
+                        touched.username && errors.username ? 'red' : 'gray'
                       }
                       right={null}
                     />
@@ -200,15 +217,15 @@ const ProfessionalRef = ({ navigation, route }) => {
                     )}
                   </>
                 )}
-                {value === "paypal" && (
+                {value === 'paypal' && (
                   <>
                     <CcTextInput
-                      label={"Username or email"}
-                      onChangeText={handleChange("username")}
-                      onBlur={handleBlur("username")}
+                      label={'Username or email'}
+                      onChangeText={handleChange('username')}
+                      onBlur={handleBlur('username')}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? "red" : "gray"
+                        touched.username && errors.username ? 'red' : 'gray'
                       }
                       right={null}
                     />
@@ -221,15 +238,19 @@ const ProfessionalRef = ({ navigation, route }) => {
                 )}
               </>
             )}
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "flex-end",
-                paddingBottom: "10%",
-              }}
-            >
-              <CcButton title={"SUBMIT"} onPress={handleSubmit} />
-            </View>
+            {loading ? (
+              <ActivityIndicator style={{ flex: 1 }} size={'large'} />
+            ) : (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  paddingBottom: '10%',
+                }}
+              >
+                <CcButton title={'SUBMIT'} onPress={handleSubmit} />
+              </View>
+            )}
           </>
         )}
       </Formik>

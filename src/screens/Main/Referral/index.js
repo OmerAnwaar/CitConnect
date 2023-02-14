@@ -1,27 +1,32 @@
-import { Formik } from "formik";
-import React from "react";
-import { Alert, Image, Text, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useSelector } from "react-redux";
+import { Formik } from 'formik';
+import React, { useState } from 'react';
+import { Alert, Image, Text, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { ActivityIndicator } from 'react-native-paper';
+import { useDispatch, useSelector } from 'react-redux';
 
-import * as yup from "yup";
+import * as yup from 'yup';
 
-import CcButton from "../../../components/CcButton";
-import CcTextInput from "../../../components/CcTextInput";
-import icons from "../../../constants";
-import styles from "./styles";
+import CcButton from '../../../components/CcButton';
+import CcTextInput from '../../../components/CcTextInput';
+import icons from '../../../constants';
+import { addReferralInfo } from '../../../store/features/authSlice';
+import styles from './styles';
 
 const initialValues = {
-  bussinessName: "",
-  bussinessNumber: "",
-  bussinessAddress: "",
-  contactName: "",
-  contactEmail: "",
-  contactNumber: "",
-  globalErr: "",
+  bussinessName: '',
+  bussinessNumber: '',
+  bussinessAddress: '',
+  contactName: '',
+  contactEmail: '',
+  contactNumber: '',
+  globalErr: '',
 };
 
-const Referral = ({ navigation }) => {
+const Referral = () => {
+  const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const validationSchema = yup.object().shape({
     bussinessName: yup.string().required(),
     bussinessNumber: yup.string().required(),
@@ -31,8 +36,9 @@ const Referral = ({ navigation }) => {
     contactNumber: yup.string(),
   });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values, { resetForm }) => {
     try {
+      setLoading(true);
       const payload = {
         bussinessName: values.bussinessName,
         bussinessNumber: values.bussinessNumber,
@@ -40,11 +46,16 @@ const Referral = ({ navigation }) => {
         contactName: values.contactName,
         contactEmail: values.contactEmail,
         contactNumber: values.contactNumber,
+        userId: user?.uid,
       };
-      Alert.alert("Form Submitted Succesfully");
+      await dispatch(addReferralInfo(payload)).unwrap();
+      Alert.alert('Form Submitted Successfully');
+      resetForm();
+      setLoading(false);
       console.log(payload);
     } catch (err) {
-      console.log(err);
+      setLoading(false);
+      console.error(err.message);
     }
   };
 
@@ -53,7 +64,7 @@ const Referral = ({ navigation }) => {
       <Image
         style={styles.longLogo}
         source={icons.LOGO}
-        resizeMode={"contain"}
+        resizeMode={'contain'}
       />
       <Formik
         initialValues={initialValues}
@@ -70,12 +81,12 @@ const Referral = ({ navigation }) => {
         }) => (
           <>
             <CcTextInput
-              label={"Bussiness Name"}
-              onChangeText={handleChange("bussinessName")}
-              onBlur={handleBlur("bussinessName")}
+              label={'Bussiness Name'}
+              onChangeText={handleChange('bussinessName')}
+              onBlur={handleBlur('bussinessName')}
               value={values.bussinessName}
               outlineColor={
-                touched.bussinessName && errors.bussinessName ? "red" : "gray"
+                touched.bussinessName && errors.bussinessName ? 'red' : 'gray'
               }
               right={null}
             />
@@ -85,15 +96,15 @@ const Referral = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Bussiness Phone Number"}
-              keyboardType="phone-pad"
-              onChangeText={handleChange("bussinessNumber")}
-              onBlur={handleBlur("bussinessNumber")}
+              label={'Bussiness Phone Number'}
+              keyboardType='phone-pad'
+              onChangeText={handleChange('bussinessNumber')}
+              onBlur={handleBlur('bussinessNumber')}
               value={values.bussinessNumber}
               outlineColor={
                 touched.bussinessNumber && errors.bussinessNumber
-                  ? "red"
-                  : "gray"
+                  ? 'red'
+                  : 'gray'
               }
               right={null}
             />
@@ -103,14 +114,14 @@ const Referral = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Bussiness Address"}
-              onChangeText={handleChange("bussinessAddress")}
-              onBlur={handleBlur("bussinessAddress")}
+              label={'Bussiness Address'}
+              onChangeText={handleChange('bussinessAddress')}
+              onBlur={handleBlur('bussinessAddress')}
               value={values.bussinessAddress}
               outlineColor={
                 touched.bussinessAddress && errors.bussinessAddress
-                  ? "red"
-                  : "gray"
+                  ? 'red'
+                  : 'gray'
               }
               right={null}
             />
@@ -120,12 +131,12 @@ const Referral = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Contact Name"}
-              onChangeText={handleChange("contactName")}
-              onBlur={handleBlur("contactName")}
+              label={'Contact Name'}
+              onChangeText={handleChange('contactName')}
+              onBlur={handleBlur('contactName')}
               value={values.contactName}
               outlineColor={
-                touched.contactName && errors.contactName ? "red" : "gray"
+                touched.contactName && errors.contactName ? 'red' : 'gray'
               }
               right={null}
             />
@@ -135,14 +146,14 @@ const Referral = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Contact Email Address"}
-              keyboardType="email-address"
-              onChangeText={handleChange("contactEmail")}
-              onBlur={handleBlur("contactEmail")}
-              autoCapitalize="none"
+              label={'Contact Email Address'}
+              keyboardType='email-address'
+              onChangeText={handleChange('contactEmail')}
+              onBlur={handleBlur('contactEmail')}
+              autoCapitalize='none'
               value={values.contactEmail}
               outlineColor={
-                touched.contactEmail && errors.contactEmail ? "red" : "gray"
+                touched.contactEmail && errors.contactEmail ? 'red' : 'gray'
               }
               right={null}
             />
@@ -152,13 +163,13 @@ const Referral = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Contact  Phone Number"}
-              keyboardType="phone-pad"
-              onChangeText={handleChange("contactNumber")}
-              onBlur={handleBlur("contactNumber")}
+              label={'Contact  Phone Number'}
+              keyboardType='phone-pad'
+              onChangeText={handleChange('contactNumber')}
+              onBlur={handleBlur('contactNumber')}
               value={values.contactNumber}
-              autoCapitalize="none"
-              outlineColor={errors.contactNumber ? "red" : "gray"}
+              autoCapitalize='none'
+              outlineColor={errors.contactNumber ? 'red' : 'gray'}
               right={null}
             />
             {touched.contactNumber && errors.contactNumber ? (
@@ -166,8 +177,12 @@ const Referral = ({ navigation }) => {
             ) : (
               <View style={styles.divider} />
             )}
-            <CcButton title={"SUBMIT"} onPress={handleSubmit} />
-            <View style={{ paddingBottom: "25%" }} />
+            {loading ? (
+              <ActivityIndicator style={{ flex: 1 }} size={'large'} />
+            ) : (
+              <CcButton title={'SUBMIT'} onPress={handleSubmit} />
+            )}
+            <View style={{ paddingBottom: '25%' }} />
           </>
         )}
       </Formik>

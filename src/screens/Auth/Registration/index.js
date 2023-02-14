@@ -1,5 +1,5 @@
-import { Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import { Formik } from 'formik';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -7,34 +7,35 @@ import {
   ScrollView,
   Text,
   View,
-} from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { TextInput } from "react-native-paper";
+} from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { TextInput } from 'react-native-paper';
 
-import * as yup from "yup";
+import * as yup from 'yup';
 
-import { useDispatch } from "react-redux";
-import CcButton from "../../../components/CcButton";
-import CcTextInput from "../../../components/CcTextInput";
-import icons from "../../../constants";
-import { createUser, ifUserExists } from "../../../store/features/authSlice";
-import styles from "./styles";
-import { auth } from "../../../../firebaseConfig";
+import { useDispatch } from 'react-redux';
+import CcButton from '../../../components/CcButton';
+import CcTextInput from '../../../components/CcTextInput';
+import icons from '../../../constants';
+import { createUser, ifUserExists } from '../../../store/features/authSlice';
+import styles from './styles';
+import { auth } from '../../../../firebaseConfig';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const initialValues = {
-  firstname: "",
-  lastname: "",
-  phone: "",
-  email: "",
-  password: "",
-  globalErr: "",
+  firstname: '',
+  lastname: '',
+  phone: '',
+  email: '',
+  password: '',
+  globalErr: '',
 };
 
-const Registration = ({ navigation, route }) => {
-  const { params } = route;
+const Registration = () => {
+  const { params } = useRoute();
+  const navigation = useNavigation();
   const [secure, setSecure] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -46,72 +47,22 @@ const Registration = ({ navigation, route }) => {
     password: yup.string().required(),
   });
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  console.log(user);
-
-  async function onAuthenticate() {
-    try {
-      await auth.signOut();
-    } catch (err) {
-      Alert.alert(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-  useEffect(() => {
-    // onAuthenticate();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const handleRegistration = async (values) => {
     try {
       setLoading(true);
-      // const uid = user.uid;
       const payload = {
         firstname: values.firstname,
         lastname: values.lastname,
         phone: values.phone,
         email: values.email,
         password: values.password,
-        // uid,
-        path: params.isProfessional ? "Professional" : "General",
+        path: 'General',
       };
-      // const result = await ifUserExists(uid);
-      // console.log(result);
-      // if (result === true) {
-      //   Alert.alert("User Already Exist!");
-      //   setLoading(false);
-      //   return;
-      // }
-      const res = await dispatch(createUser(payload));
-      console.log("res", res._tokenResponse.isNewUser);
-      // dispatch(onLogin("general"));
+      await dispatch(createUser(payload)).unwrap();
       setLoading(false);
-      console.log(payload);
     } catch (err) {
       setLoading(false);
-      console.log(err);
+      console.error(err.message);
     }
   };
 
@@ -123,8 +74,9 @@ const Registration = ({ navigation, route }) => {
         phone: values.phone,
         email: values.email,
         password: values.password,
+        path: 'Professional',
       };
-      navigation.navigate("ProfessionalRef", payload);
+      navigation.navigate('ProfessionalRef', payload);
     } catch (err) {
       console.log(err);
     }
@@ -132,7 +84,7 @@ const Registration = ({ navigation, route }) => {
 
   const element = (
     <TextInput.Icon
-      icon={secure ? "eye" : "eye-off"}
+      icon={secure ? 'eye' : 'eye-off'}
       onPress={() => setSecure(!secure)}
     />
   );
@@ -143,11 +95,11 @@ const Registration = ({ navigation, route }) => {
       scrollEnabled
       style={styles.container}
     >
-      <ScrollView style={{ paddingBottom: "10%" }}>
+      <ScrollView style={{ paddingBottom: '10%' }}>
         <Image
           style={styles.longLogo}
           source={icons.LOGO}
-          resizeMode={"contain"}
+          resizeMode={'contain'}
         />
         <Formik
           initialValues={initialValues}
@@ -166,20 +118,20 @@ const Registration = ({ navigation, route }) => {
               <Text
                 style={{
                   fontSize: 20,
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  paddingBottom: "5%",
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                  paddingBottom: '5%',
                 }}
               >
                 Create an Account
               </Text>
               <CcTextInput
-                label={"First Name"}
-                onChangeText={handleChange("firstname")}
-                onBlur={handleBlur("firstname")}
+                label={'First Name'}
+                onChangeText={handleChange('firstname')}
+                onBlur={handleBlur('firstname')}
                 value={values.firstname}
                 outlineColor={
-                  touched.firstname && errors.firstname ? "red" : "gray"
+                  touched.firstname && errors.firstname ? 'red' : 'gray'
                 }
                 right={null}
               />
@@ -189,12 +141,12 @@ const Registration = ({ navigation, route }) => {
                 <View style={styles.divider} />
               )}
               <CcTextInput
-                label={"Last Name"}
-                onChangeText={handleChange("lastname")}
-                onBlur={handleBlur("lastname")}
+                label={'Last Name'}
+                onChangeText={handleChange('lastname')}
+                onBlur={handleBlur('lastname')}
                 value={values.lastname}
                 outlineColor={
-                  touched.lastname && errors.lastname ? "red" : "gray"
+                  touched.lastname && errors.lastname ? 'red' : 'gray'
                 }
                 right={null}
               />
@@ -204,12 +156,12 @@ const Registration = ({ navigation, route }) => {
                 <View style={styles.divider} />
               )}
               <CcTextInput
-                label={"Phone Number"}
-                keyboardType="phone-pad"
-                onChangeText={handleChange("phone")}
-                onBlur={handleBlur("phone")}
+                label={'Phone Number'}
+                keyboardType='phone-pad'
+                onChangeText={handleChange('phone')}
+                onBlur={handleBlur('phone')}
                 value={values.phone}
-                outlineColor={touched.phone && errors.phone ? "red" : "gray"}
+                outlineColor={touched.phone && errors.phone ? 'red' : 'gray'}
                 right={null}
               />
               {touched.phone && errors.phone ? (
@@ -218,13 +170,13 @@ const Registration = ({ navigation, route }) => {
                 <View style={styles.divider} />
               )}
               <CcTextInput
-                label={"Email Address"}
-                keyboardType="email-address"
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                autoCapitalize="none"
+                label={'Email Address'}
+                keyboardType='email-address'
+                onChangeText={handleChange('email')}
+                onBlur={handleBlur('email')}
+                autoCapitalize='none'
                 value={values.email}
-                outlineColor={touched.email && errors.email ? "red" : "gray"}
+                outlineColor={touched.email && errors.email ? 'red' : 'gray'}
                 right={null}
               />
               {touched.email && errors.email ? (
@@ -233,14 +185,14 @@ const Registration = ({ navigation, route }) => {
                 <View style={styles.divider} />
               )}
               <CcTextInput
-                label={"Password"}
-                keyboardType="default"
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
+                label={'Password'}
+                keyboardType='default'
+                onChangeText={handleChange('password')}
+                onBlur={handleBlur('password')}
                 value={values.password}
                 secureTextEntry={secure}
-                autoCapitalize="none"
-                outlineColor={errors.password ? "red" : "gray"}
+                autoCapitalize='none'
+                outlineColor={errors.password ? 'red' : 'gray'}
                 right={element}
               />
               {touched.password && errors.password ? (
@@ -249,14 +201,14 @@ const Registration = ({ navigation, route }) => {
                 <View style={styles.divider} />
               )}
               <CcButton
-                title={params.isProfessional ? "NEXT" : "SUBMIT"}
+                title={params.isProfessional ? 'NEXT' : 'SUBMIT'}
                 onPress={handleSubmit}
               />
             </>
           )}
         </Formik>
       </ScrollView>
-      {loading && <ActivityIndicator style={{ flex: 1 }} size={"large"} />}
+      {loading && <ActivityIndicator style={{ flex: 1 }} size={'large'} />}
     </KeyboardAwareScrollView>
   );
 };

@@ -1,42 +1,50 @@
-import { Formik } from "formik";
-import React, { useState } from "react";
-import { Alert, Image, Pressable, Text, View } from "react-native";
-import { TextInput } from "react-native-paper";
-import { useDispatch } from "react-redux";
+import { Formik } from 'formik';
+import React, { useState } from 'react';
+import {
+  Alert,
+  Image,
+  Pressable,
+  Text,
+  View,
+  ActivityIndicator,
+} from 'react-native';
+import { useDispatch } from 'react-redux';
 
-import * as yup from "yup";
+import * as yup from 'yup';
 
-import CcButton from "../../../components/CcButton";
-import CcTextInput from "../../../components/CcTextInput";
-import icons from "../../../constants";
-import { onLogin } from "../../../store/features/authSlice";
-import styles from "./styles";
+import CcButton from '../../../components/CcButton';
+import CcTextInput from '../../../components/CcTextInput';
+import icons from '../../../constants';
+import styles from './styles';
+import { resetPassword } from '../../../store/features/authSlice';
+import { useNavigation } from '@react-navigation/native';
 
 const initialValues = {
-  email: "",
-  password: "",
-  globalErr: "",
+  email: '',
+  password: '',
+  globalErr: '',
 };
 
-const ForgotPassword = ({ navigation }) => {
-  const [secure, setSecure] = useState(true);
+const ForgotPassword = () => {
+  const [loading, setLoading] = useState(false);
+
+  const navigation = useNavigation();
+
   const dispatch = useDispatch();
 
   const validationSchema = yup.object().shape({
     email: yup.string().email().required(),
-    password: yup.string().required(),
   });
 
-  const handleLogin = async (values) => {
+  const handleForgetPassword = async (values) => {
     try {
-      const payload = {
-        login: values.email.trim(),
-        password: values.password,
-      };
-      dispatch(onLogin());
-      console.log(payload);
+      setLoading(true);
+      await dispatch(resetPassword(values.email.trim())).unwrap();
+      navigation.goBack();
+      setLoading(false);
     } catch (err) {
-      console.log(err);
+      setLoading(false);
+      console.error(err.message);
     }
   };
 
@@ -45,11 +53,11 @@ const ForgotPassword = ({ navigation }) => {
       <Image
         style={styles.longLogo}
         source={icons.LOGO}
-        resizeMode={"contain"}
+        resizeMode={'contain'}
       />
       <Formik
         initialValues={initialValues}
-        onSubmit={handleLogin}
+        onSubmit={handleForgetPassword}
         validationSchema={validationSchema}
       >
         {({
@@ -62,61 +70,33 @@ const ForgotPassword = ({ navigation }) => {
         }) => (
           <>
             <CcTextInput
-              label={"New Password"}
-              keyboardType="default"
-              onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
-              value={values.password}
-              inactiveColor={"black"}
-              secureTextEntry={secure}
-              autoCapitalize="none"
-              outlineColor={errors.password ? "red" : "gray"}
-              right={
-                <TextInput.Icon
-                  icon={secure ? "eye" : "eye-off"}
-                  onPress={() => setSecure(!secure)}
-                />
-              }
+              label={'Email Address'}
+              keyboardType='email-address'
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
+              autoCapitalize='none'
+              value={values.email}
+              outlineColor={touched.email && errors.email ? 'red' : 'black'}
+              right={null}
             />
             {touched.email && errors.email ? (
               <Text style={styles.errorText}>{errors.email}</Text>
             ) : (
               <View style={styles.divider} />
             )}
-            <CcTextInput
-              label={"Confirm New Password"}
-              keyboardType="default"
-              onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
-              value={values.password}
-              inactiveColor={"black"}
-              secureTextEntry={secure}
-              autoCapitalize="none"
-              outlineColor={errors.password ? "red" : "gray"}
-              right={
-                <TextInput.Icon
-                  icon={secure ? "eye" : "eye-off"}
-                  onPress={() => setSecure(!secure)}
-                />
-              }
-            />
-            {touched.password && errors.password ? (
-              <Text style={styles.errorText}>{errors.password}</Text>
+            {loading ? (
+              <ActivityIndicator style={{ flex: 1 }} size={'large'} />
             ) : (
-              <View style={styles.divider} />
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  paddingBottom: '10%',
+                }}
+              >
+                <CcButton title={'Submit'} onPress={handleSubmit} />
+              </View>
             )}
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "flex-end",
-                paddingBottom: "10%",
-              }}
-            >
-              <CcButton
-                title={"SAVE"}
-                onPress={() => navigation.navigate("Registration")}
-              />
-            </View>
           </>
         )}
       </Formik>

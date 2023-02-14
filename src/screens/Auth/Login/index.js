@@ -1,27 +1,28 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { Formik } from "formik";
-import React, { useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
-import { TextInput } from "react-native-paper";
-import { useDispatch } from "react-redux";
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { Formik } from 'formik';
+import React, { useState } from 'react';
+import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import { TextInput } from 'react-native-paper';
+import { useDispatch } from 'react-redux';
 
-import * as yup from "yup";
+import * as yup from 'yup';
 
-import { auth } from "../../../../firebaseConfig";
-import CcButton from "../../../components/CcButton";
-import CcTextInput from "../../../components/CcTextInput";
-import icons from "../../../constants";
-import { onLogin } from "../../../store/features/authSlice";
-import styles from "./styles";
+import { auth } from '../../../../firebaseConfig';
+import CcButton from '../../../components/CcButton';
+import CcTextInput from '../../../components/CcTextInput';
+import icons from '../../../constants';
+import { isGuest, onLogin, userLogin } from '../../../store/features/authSlice';
+import styles from './styles';
 
 const initialValues = {
-  email: "",
-  password: "",
-  globalErr: "",
+  email: '',
+  password: '',
+  globalErr: '',
 };
 
 const Login = ({ navigation }) => {
   const [secure, setSecure] = useState(true);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
 
   const validationSchema = yup.object().shape({
@@ -31,14 +32,17 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async (values) => {
     try {
+      setLoading(true);
       const payload = {
-        login: values.email.trim(),
+        email: values.email.trim(),
         password: values.password,
       };
-      dispatch(onLogin());
-      console.log(payload);
+      await dispatch(userLogin(payload)).unwrap();
+
+      setLoading(false);
     } catch (err) {
-      console.log(err);
+      setLoading(false);
+      console.error(err.message);
     }
   };
 
@@ -47,7 +51,7 @@ const Login = ({ navigation }) => {
       <Image
         style={styles.longLogo}
         source={icons.LOGO}
-        resizeMode={"contain"}
+        resizeMode={'contain'}
       />
       <Formik
         initialValues={initialValues}
@@ -64,13 +68,13 @@ const Login = ({ navigation }) => {
         }) => (
           <>
             <CcTextInput
-              label={"Email Address"}
-              keyboardType="email-address"
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
-              autoCapitalize="none"
+              label={'Email Address'}
+              keyboardType='email-address'
+              onChangeText={handleChange('email')}
+              onBlur={handleBlur('email')}
+              autoCapitalize='none'
               value={values.email}
-              outlineColor={touched.email && errors.email ? "red" : "black"}
+              outlineColor={touched.email && errors.email ? 'red' : 'black'}
               right={null}
             />
             {touched.email && errors.email ? (
@@ -79,18 +83,18 @@ const Login = ({ navigation }) => {
               <View style={styles.divider} />
             )}
             <CcTextInput
-              label={"Password"}
-              keyboardType="default"
-              onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
+              label={'Password'}
+              keyboardType='default'
+              onChangeText={handleChange('password')}
+              onBlur={handleBlur('password')}
               value={values.password}
-              inactiveColor={"black"}
+              inactiveColor={'black'}
               secureTextEntry={secure}
-              autoCapitalize="none"
-              outlineColor={errors.password ? "red" : "gray"}
+              autoCapitalize='none'
+              outlineColor={errors.password ? 'red' : 'gray'}
               right={
                 <TextInput.Icon
-                  icon={secure ? "eye" : "eye-off"}
+                  icon={secure ? 'eye' : 'eye-off'}
                   onPress={() => setSecure(!secure)}
                 />
               }
@@ -100,30 +104,33 @@ const Login = ({ navigation }) => {
             ) : (
               <View style={styles.divider} />
             )}
-            <Pressable onPress={() => navigation.navigate("ForgotPassword")}>
+            <Pressable onPress={() => navigation.navigate('ForgotPassword')}>
               <Text style={styles.forgotPassword}>Forget Password?</Text>
             </Pressable>
-
-            <View
-              style={{
-                marginVertical: "5%",
-                flex: 1,
-                justifyContent: "flex-end",
-                paddingBottom: "10%",
-              }}
-            >
-              <CcButton title={"LOGIN"} onPress={handleSubmit} />
-              <View style={{ paddingVertical: "2%" }} />
-              <CcButton
-                title={"Continue as a Guest"}
-                onPress={() => dispatch(onLogin())}
-              />
-              <View style={{ paddingVertical: "2%" }} />
-              <CcButton
-                title={"Dont have an account? Sign Up"}
-                onPress={() => navigation.navigate("Account Type")}
-              />
-            </View>
+            {loading ? (
+              <ActivityIndicator style={{ flex: 1 }} size={'large'} />
+            ) : (
+              <View
+                style={{
+                  marginVertical: '5%',
+                  flex: 1,
+                  justifyContent: 'flex-end',
+                  paddingBottom: '10%',
+                }}
+              >
+                <CcButton title={'LOGIN'} onPress={handleSubmit} />
+                <View style={{ paddingVertical: '2%' }} />
+                <CcButton
+                  title={'Continue as a Guest'}
+                  onPress={() => dispatch(isGuest())}
+                />
+                <View style={{ paddingVertical: '2%' }} />
+                <CcButton
+                  title={'Dont have an account? Sign Up'}
+                  onPress={() => navigation.navigate('Account Type')}
+                />
+              </View>
+            )}
           </>
         )}
       </Formik>
