@@ -46,13 +46,12 @@ const Referral = () => {
         contactName: values.contactName,
         contactEmail: values.contactEmail,
         contactNumber: values.contactNumber,
-        userId: user?.uid,
+        userId: user?.uid ? user?.uid : 'guest',
       };
       await dispatch(addReferralInfo(payload)).unwrap();
       Alert.alert('Form Submitted Successfully');
       resetForm();
       setLoading(false);
-      console.log(payload);
     } catch (err) {
       setLoading(false);
       console.error(err.message);

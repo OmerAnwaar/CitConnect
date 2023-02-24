@@ -56,7 +56,7 @@ export const userLogin = createAsyncThunk(
       const docRef = doc(db, 'Users', user.uid);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        console.log('Document data:');
+        console.log('Document data:Exists');
       } else {
         rejectWithValue(new Error('No such document!'));
       }

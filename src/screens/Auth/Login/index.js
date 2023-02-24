@@ -1,7 +1,14 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { Formik } from 'formik';
 import React, { useState } from 'react';
-import { ActivityIndicator, Image, Pressable, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  Text,
+  View,
+} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 
@@ -42,7 +49,8 @@ const Login = ({ navigation }) => {
       setLoading(false);
     } catch (err) {
       setLoading(false);
-      console.error(err.message);
+      // console.error(err.message);
+      Alert.alert('Error', 'Invalid Credentials!');
     }
   };
 

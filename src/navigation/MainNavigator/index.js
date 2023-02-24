@@ -12,7 +12,6 @@ const Stack = createStackNavigator();
 
 const MainNavigator = () => {
   const user = useSelector((state) => state.auth);
-  console.log(user);
   const dispatch = useDispatch();
   function handleLogout() {
     Alert.alert('Logout!', 'Are you sure?', [

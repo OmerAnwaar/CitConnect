@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { Alert, Image, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { ActivityIndicator } from 'react-native-paper';
 import { useDispatch } from 'react-redux';
 import * as yup from 'yup';
 
@@ -68,7 +69,6 @@ const ProfessionalRef = () => {
           paymentUser: values.username,
         };
       }
-      console.log(payload);
       await dispatch(createUser(payload)).unwrap();
       setLoading(false);
     } catch (err) {
