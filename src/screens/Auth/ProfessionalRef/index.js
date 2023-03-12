@@ -1,25 +1,25 @@
-import { useRoute } from '@react-navigation/native';
-import Checkbox from 'expo-checkbox';
-import { Formik } from 'formik';
-import React, { useState } from 'react';
-import { Alert, Image, Text, View } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { ActivityIndicator } from 'react-native-paper';
-import { useDispatch } from 'react-redux';
-import * as yup from 'yup';
+import { useRoute } from "@react-navigation/native";
+import Checkbox from "expo-checkbox";
+import { Formik } from "formik";
+import React, { useState } from "react";
+import { Alert, Image, Text, View } from "react-native";
+import DropDownPicker from "react-native-dropdown-picker";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ActivityIndicator } from "react-native-paper";
+import { useDispatch } from "react-redux";
+import * as yup from "yup";
 
-import CcButton from '../../../components/CcButton';
-import CcTextInput from '../../../components/CcTextInput';
-import icons from '../../../constants';
-import { createUser } from '../../../store/features/authSlice';
-import styles from './styles';
+import CcButton from "../../../components/CcButton";
+import CcTextInput from "../../../components/CcTextInput";
+import icons from "../../../constants";
+import { createUser } from "../../../store/features/authSlice";
+import styles from "./styles";
 
 const initialValues = {
-  bussinessEIN: '',
-  address: '',
-  username: '',
-  globalErr: '',
+  bussinessEIN: "",
+  address: "",
+  username: "",
+  globalErr: "",
 };
 
 const ProfessionalRef = () => {
@@ -28,12 +28,12 @@ const ProfessionalRef = () => {
   const [isDirect, setIsDirect] = useState(false);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const [items, setItems] = useState([
-    { label: 'Zelle', value: 'zelle' },
-    { label: 'Cashapp', value: 'cashapp' },
-    { label: 'Paypal', value: 'paypal' },
-    { label: 'Venmo', value: 'venmo' },
+    { label: "Zelle", value: "zelle" },
+    { label: "Cashapp", value: "cashapp" },
+    { label: "Paypal", value: "paypal" },
+    { label: "Venmo", value: "venmo" },
   ]);
 
   const validationSchema = yup.object().shape({
@@ -46,11 +46,11 @@ const ProfessionalRef = () => {
   const handleSubmit = async (values) => {
     try {
       if (!isWeekly && !isDirect) {
-        Alert.alert('Please select payment method!');
+        Alert.alert("Please select payment method!");
         return;
       }
       if (isDirect && !value) {
-        Alert.alert('Please select an option for Payments!');
+        Alert.alert("Please select an option for Payments!");
         return;
       }
       setLoading(true);
@@ -72,6 +72,11 @@ const ProfessionalRef = () => {
       await dispatch(createUser(payload)).unwrap();
       setLoading(false);
     } catch (err) {
+      if (err.message.includes("auth/email-already-in-use")) {
+        Alert.alert("Email already registered");
+      } else {
+        Alert.alert(err.message);
+      }
       console.error(err.message);
       setLoading(false);
     }
@@ -91,7 +96,7 @@ const ProfessionalRef = () => {
       <Image
         style={styles.longLogo}
         source={icons.LOGO}
-        resizeMode={'contain'}
+        resizeMode={"contain"}
       />
       <Formik
         initialValues={initialValues}
@@ -108,13 +113,13 @@ const ProfessionalRef = () => {
         }) => (
           <>
             <CcTextInput
-              label={'Bussiness EIN'}
-              keyboardType='phone-number'
-              onChangeText={handleChange('bussinessEIN')}
-              onBlur={handleBlur('bussinessEIN')}
+              label={"Bussiness EIN"}
+              keyboardType="phone-number"
+              onChangeText={handleChange("bussinessEIN")}
+              onBlur={handleBlur("bussinessEIN")}
               value={values.bussinessEIN}
               outlineColor={
-                touched.bussinessEIN && errors.bussinessEIN ? 'red' : 'gray'
+                touched.bussinessEIN && errors.bussinessEIN ? "red" : "gray"
               }
               right={null}
             />
@@ -123,24 +128,24 @@ const ProfessionalRef = () => {
             ) : (
               <View style={styles.divider} />
             )}
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Checkbox
                 style={styles.checkbox}
                 value={isWeekly}
                 onValueChange={handleGeneral}
-                color={isWeekly ? 'orange' : undefined}
+                color={isWeekly ? "orange" : undefined}
               />
               <Text>Mail referral fee to bussiness address (2-3 weeks)</Text>
             </View>
             {isWeekly && (
               <>
                 <CcTextInput
-                  label={'Address'}
-                  onChangeText={handleChange('address')}
-                  onBlur={handleBlur('address')}
+                  label={"Address"}
+                  onChangeText={handleChange("address")}
+                  onBlur={handleBlur("address")}
                   value={values.address}
                   outlineColor={
-                    touched.address && errors.address ? 'red' : 'gray'
+                    touched.address && errors.address ? "red" : "gray"
                   }
                   right={null}
                 />
@@ -153,16 +158,16 @@ const ProfessionalRef = () => {
             )}
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingBottom: '4%',
+                flexDirection: "row",
+                alignItems: "center",
+                paddingBottom: "4%",
               }}
             >
               <Checkbox
                 style={styles.checkbox}
                 value={isDirect}
                 onValueChange={handleProfessional}
-                color={isDirect ? 'orange' : undefined}
+                color={isDirect ? "orange" : undefined}
               />
               <Text>Mobile Payment</Text>
             </View>
@@ -179,15 +184,15 @@ const ProfessionalRef = () => {
                   itemSeparatorStyle={styles.pickerItemSeperatorStyle}
                   style={styles.pickerStyle}
                 />
-                {(value === 'cashapp' || value === 'venmo') && (
+                {(value === "cashapp" || value === "venmo") && (
                   <>
                     <CcTextInput
-                      label={'Username'}
-                      onChangeText={handleChange('username')}
-                      onBlur={handleBlur('username')}
+                      label={"Username"}
+                      onChangeText={handleChange("username")}
+                      onBlur={handleBlur("username")}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? 'red' : 'gray'
+                        touched.username && errors.username ? "red" : "gray"
                       }
                       right={null}
                     />
@@ -198,15 +203,15 @@ const ProfessionalRef = () => {
                     )}
                   </>
                 )}
-                {value === 'zelle' && (
+                {value === "zelle" && (
                   <>
                     <CcTextInput
-                      label={'Phone Number or Email'}
-                      onChangeText={handleChange('username')}
-                      onBlur={handleBlur('username')}
+                      label={"Phone Number or Email"}
+                      onChangeText={handleChange("username")}
+                      onBlur={handleBlur("username")}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? 'red' : 'gray'
+                        touched.username && errors.username ? "red" : "gray"
                       }
                       right={null}
                     />
@@ -217,15 +222,15 @@ const ProfessionalRef = () => {
                     )}
                   </>
                 )}
-                {value === 'paypal' && (
+                {value === "paypal" && (
                   <>
                     <CcTextInput
-                      label={'Username or email'}
-                      onChangeText={handleChange('username')}
-                      onBlur={handleBlur('username')}
+                      label={"Username or email"}
+                      onChangeText={handleChange("username")}
+                      onBlur={handleBlur("username")}
                       value={values.username}
                       outlineColor={
-                        touched.username && errors.username ? 'red' : 'gray'
+                        touched.username && errors.username ? "red" : "gray"
                       }
                       right={null}
                     />
@@ -239,16 +244,16 @@ const ProfessionalRef = () => {
               </>
             )}
             {loading ? (
-              <ActivityIndicator style={{ flex: 1 }} size={'large'} />
+              <ActivityIndicator style={{ flex: 1 }} size={"large"} />
             ) : (
               <View
                 style={{
                   flex: 1,
-                  justifyContent: 'flex-end',
-                  paddingBottom: '10%',
+                  justifyContent: "flex-end",
+                  paddingBottom: "10%",
                 }}
               >
-                <CcButton title={'SUBMIT'} onPress={handleSubmit} />
+                <CcButton title={"SUBMIT"} onPress={handleSubmit} />
               </View>
             )}
           </>
